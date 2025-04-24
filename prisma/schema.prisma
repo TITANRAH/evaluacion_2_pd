@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Cliente {
+  id       Int      @id @default(autoincrement())
+  nombre   String
+  correo   String   @unique
+  password String
+  rol      String   @default("cliente")
+  pedidos  Pedido[]
+}
+
+model Producto {
+  id           Int              @id @default(autoincrement())
+  nombre       String
+  sku          String           @unique
+  precioCosto  Float
+  imagenUrl    String
+  categoriaId  Int
+  categoria    Categoria        @relation(fields: [categoriaId], references: [id])
+  bodegas      BodegaProducto[]
+  lineasPedido LineaPedido[]
+}
+
+model Categoria {
+  id        Int         @id @default(autoincrement())
+  nombre    String
+  slug      String      @unique
+  parentId  Int?
+  parent    Categoria?  @relation("CategoriaPadre", fields: [parentId], references: [id])
+  hijos     Categoria[] @relation("CategoriaPadre")
+  productos Producto[]
+}
+
+model BodegaProducto {
+  id         Int      @id @default(autoincrement())
+  productoId Int
+  bodegaId   Int
+  stock      Int
+  producto   Producto @relation(fields: [productoId], references: [id])
+  bodega     Bodega   @relation(fields: [bodegaId], references: [id])
+}
+
+model Bodega {
+  id     Int              @id @default(autoincrement())
+  nombre String
+  stock  BodegaProducto[]
+}
+
+model Pedido {
+  id        Int           @id @default(autoincrement())
+  clienteId Int
+  total     Float
+  pagoTipo  String
+  estado    String        @default("pendiente")
+  direccion String
+  telefono  String
+  cliente   Cliente       @relation(fields: [clienteId], references: [id])
+  lineas    LineaPedido[]
+  creadoEn  DateTime      @default(now())
+}
+
+model LineaPedido {
+  id             Int      @id @default(autoincrement())
+  pedidoId       Int
+  productoId     Int
+  cantidad       Int
+  precioUnitario Float
+  subtotal       Float
+  producto       Producto @relation(fields: [productoId], references: [id])
+  pedido         Pedido   @relation(fields: [pedidoId], references: [id])
+}
