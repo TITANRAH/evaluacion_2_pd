@@ -13,7 +13,7 @@ export const products: Product[] = [
     name: "Lámpara LumiGlow",
     price: 26000,
     stock: 18,
-    image: lamparaCarrie.src,
+    image: lamparaCarrie,
     category: "lamps",
   },
   {
@@ -21,7 +21,7 @@ export const products: Product[] = [
     name: "Lámpara NordicBeam",
     price: 64999,
     stock: 60,
-    image: lamparaNordicBeam.src,
+    image: lamparaNordicBeam,
     category: "lamps",
   },
   {
@@ -29,7 +29,7 @@ export const products: Product[] = [
     name: "Lámpara Nomad Light",
     price: 58499,
     stock: 9,
-    image: lamparaNomadLight.src,
+    image: lamparaNomadLight,
     category: "lamps",
   },
   {
@@ -37,7 +37,7 @@ export const products: Product[] = [
     name: "Lámpara HaloTouch",
     price: 19500,
     stock: 2,
-    image: lamparaHaloTouch.src,
+    image: lamparaHaloTouch,
     category: "lamps",
   },
   {
@@ -45,7 +45,7 @@ export const products: Product[] = [
     name: "Silla Lounge",
     price: 32499,
     stock: 3,
-    image: sillaLounge.src,
+    image: sillaLounge,
     category: "chairs",
   },
   {
@@ -53,7 +53,7 @@ export const products: Product[] = [
     name: "Silla Clásica Moderna",
     price: 26000,
     stock: 1,
-    image: sillaClasicaModerna.src,
+    image: sillaClasicaModerna,
     category: "chairs",
   },
 ]
