@@ -8,49 +8,50 @@ datasource db {
 }
 
 model Cliente {
-  id       Int      @id @default(autoincrement())
-  nombre   String
-  correo   String   @unique
-  password String
-  rol      String   @default("cliente")
-  pedidos  Pedido[]
-}
-
-model Producto {
-  id           Int              @id @default(autoincrement())
-  nombre       String
-  sku          String           @unique
-  precioCosto  Float
-  imagenUrl    String
-  categoriaId  Int
-  categoria    Categoria        @relation(fields: [categoriaId], references: [id])
-  bodegas      BodegaProducto[]
-  lineasPedido LineaPedido[]
+  id         Int      @id @default(autoincrement())
+  correo     String   @unique
+  nombre     String
+  comuna     String
+  direccion  String
+  contrasena String
+  pedidos    Pedido[]
 }
 
 model Categoria {
   id        Int         @id @default(autoincrement())
   nombre    String
-  slug      String      @unique
-  parentId  Int?
-  parent    Categoria?  @relation("CategoriaPadre", fields: [parentId], references: [id])
+  padre_id  Int?
+  padre     Categoria?  @relation("CategoriaPadre", fields: [padre_id], references: [id])
   hijos     Categoria[] @relation("CategoriaPadre")
   productos Producto[]
 }
 
-model BodegaProducto {
-  id         Int      @id @default(autoincrement())
-  productoId Int
-  bodegaId   Int
-  stock      Int
-  producto   Producto @relation(fields: [productoId], references: [id])
-  bodega     Bodega   @relation(fields: [bodegaId], references: [id])
+model Producto {
+  id           Int           @id @default(autoincrement())
+  sku          String        @unique
+  nombre       String
+  costo        Float
+  imagen       String
+  categoria_id Int
+  categoria    Categoria     @relation(fields: [categoria_id], references: [id])
+  stock        Stock[]
+  lineasPedido LineaPedido[]
 }
 
 model Bodega {
-  id     Int              @id @default(autoincrement())
-  nombre String
-  stock  BodegaProducto[]
+  id        Int     @id @default(autoincrement())
+  nombre    String
+  direccion String
+  stock     Stock[]
+}
+
+model Stock {
+  id          Int      @id @default(autoincrement())
+  producto_id Int
+  bodega_id   Int
+  cantidad    Int
+  producto    Producto @relation(fields: [producto_id], references: [id])
+  bodega      Bodega   @relation(fields: [bodega_id], references: [id])
 }
 
 model Pedido {
@@ -58,21 +59,16 @@ model Pedido {
   clienteId Int
   total     Float
   pagoTipo  String
-  estado    String        @default("pendiente")
-  direccion String
-  telefono  String
   cliente   Cliente       @relation(fields: [clienteId], references: [id])
   lineas    LineaPedido[]
   creadoEn  DateTime      @default(now())
 }
 
 model LineaPedido {
-  id             Int      @id @default(autoincrement())
-  pedidoId       Int
-  productoId     Int
-  cantidad       Int
-  precioUnitario Float
-  subtotal       Float
-  producto       Producto @relation(fields: [productoId], references: [id])
-  pedido         Pedido   @relation(fields: [pedidoId], references: [id])
+  id         Int      @id @default(autoincrement())
+  pedidoId   Int
+  productoId Int
+  cantidad   Int
+  producto   Producto @relation(fields: [productoId], references: [id])
+  pedido     Pedido   @relation(fields: [pedidoId], references: [id])
 }

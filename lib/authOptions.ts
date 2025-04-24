@@ -1,20 +1,20 @@
-import { NextAuthOptions } from "next-auth";
-import prisma from "@/lib/prismadb";
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcrypt";
+import { NextAuthOptions } from 'next-auth';
+import prisma from '@/lib/prismadb';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcrypt';
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "credentials",
+      name: 'credentials',
       credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
-            throw new Error("Credenciales inválidas");
+            throw new Error('Credenciales inválidas');
           }
 
           const cliente = await prisma.cliente.findUnique({
@@ -23,32 +23,27 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
-          // console.log('cliente', cliente);
-
-          if (!cliente || !cliente?.password) {
-            throw new Error("Usuario no encontrado");
+          if (!cliente || !cliente?.contrasena) {
+            throw new Error('Usuario no encontrado');
           }
 
-          const isCorrectPassword = await bcrypt.compare(
-            credentials.password,
-            cliente.password
-          );
+          const isCorrectPassword = await bcrypt.compare(credentials.password, cliente.contrasena);
 
           if (!isCorrectPassword) {
-            throw new Error("Contraseña incorrecta");
+            throw new Error('Contraseña incorrecta');
           }
 
           return {
             id: cliente.id.toString(),
             nombre: cliente.nombre,
-            correo: cliente.correo,
-            rol: cliente.rol,
             email: cliente.correo,
+            comuna: cliente.comuna,
+            direccion: cliente.direccion,
             emailVerified: null,
             image: null,
           };
         } catch (error) {
-          console.error("Error en authorize:", error);
+          console.error('Error en authorize:', error);
           throw error;
         }
       },
@@ -59,9 +54,9 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.nombre = user.nombre;
-        token.correo = user.correo;
-        token.rol = user.rol;
         token.email = user.email;
+        token.comuna = user.comuna;
+        token.direccion = user.direccion;
       }
       return token;
     },
@@ -70,22 +65,21 @@ export const authOptions: NextAuthOptions = {
         session.user = {
           id: token.id,
           nombre: token.nombre,
-          correo: token.correo,
-          rol: token.rol,
           email: token.email,
-          image: null,
+          comuna: token.comuna,
+          direccion: token.direccion,
         };
       }
       return session;
     },
   },
   pages: {
-    signIn: "/ingresar",
+    signIn: '/auth/login',
   },
   session: {
-    strategy: "jwt",
-    maxAge: 60 * 30,
+    strategy: 'jwt',
+    maxAge: 60 * 30, // 30 minutos
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  debug: process.env.NODE_ENV === 'development',
 };

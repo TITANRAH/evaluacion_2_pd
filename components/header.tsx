@@ -1,9 +1,14 @@
-import Link from "next/link"
-import { ShoppingCart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import Link from 'next/link';
 
-export function Header() {
+import GoToLogin from './header/button-or-login';
+import { auth } from '@/utils/auth';
+import ButtonCar from './header/button-car';
+import ButtonDropDownMenu from './header/button-dropdown-menu';
+import ButtonSignOut from './header/button-sign-out';
+
+export async function Header() {
+  const session = await auth();
+
   return (
     <header className="border-b">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -11,48 +16,37 @@ export function Header() {
           <Link href="/" className="text-xl font-bold">
             Deccos
           </Link>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+          <nav className="hidden items-center gap-6 md:flex">
+            <Link
+              href="/"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
               Inicio
             </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="link" className="text-sm font-medium text-muted-foreground hover:text-foreground p-0">
-                  Categorías
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem>Lámparas</DropdownMenuItem>
-                <DropdownMenuItem>Sillas</DropdownMenuItem>
-                <DropdownMenuItem>Mesas</DropdownMenuItem>
-                <DropdownMenuItem>Decoración</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Link href="/ubicacion" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            <ButtonDropDownMenu />
+            <Link
+              href="/ubicacion"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
               Ubicación
             </Link>
-            <Link href="/contacto" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            <Link
+              href="/contacto"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
               Contacto
             </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-sm text-muted-foreground">
-            Bienvenido Anónimo (
-            <Link href="/auth/login" className="text-primary hover:underline">
-              Ingresar
-            </Link>
-            )
+            Bienvenido {session ? session?.user?.nombre : <GoToLogin />}
           </div>
-          <Button variant="outline" size="sm" className="relative">
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            CARRO
-            <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-              0
-            </span>
-          </Button>
+          <ButtonCar />
+
+          <ButtonSignOut />
         </div>
       </div>
     </header>
-  )
+  );
 }

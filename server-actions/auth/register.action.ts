@@ -1,11 +1,13 @@
-"use server";
+'use server';
 
-import prisma from "@/lib/prismadb";
-import bcrypt from "bcrypt";
+import prisma from '@/lib/prismadb';
+import bcrypt from 'bcrypt';
 
 export async function registerUser(data: {
   nombre: string;
-  correo: string;
+  email: string;
+  comuna: string;
+  direccion: string;
   password: string;
 }) {
   try {
@@ -14,15 +16,16 @@ export async function registerUser(data: {
     const user = await prisma.cliente.create({
       data: {
         nombre: data.nombre,
-        correo: data.correo,
-        password: hashedPassword,
-        rol: "cliente",
+        correo: data.email,
+        comuna: data.comuna,
+        direccion: data.direccion,
+        contrasena: hashedPassword,
       },
     });
 
     return { success: true, user };
   } catch (error) {
-    console.error("Error en registro:", error);
-    return { success: false, error: "Error al registrar usuario" };
+    console.error('Error en registro:', error);
+    return { success: false, error: 'Error al registrar usuario' };
   }
 }

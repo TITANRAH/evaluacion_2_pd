@@ -1,28 +1,31 @@
-import { DefaultSession, DefaultUser } from "next-auth";
-import { AdapterUser } from "@auth/core/adapters";
+import { DefaultSession, DefaultUser } from 'next-auth';
+import { AdapterUser } from '@auth/core/adapters';
 
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session {
     user: {
       id: string;
       nombre: string;
-      correo: string;
-      rol: string;
-    } & DefaultSession["user"];
+      email: string;
+      comuna: string;
+      direccion: string;
+    } & DefaultSession['user'];
   }
 
   interface User extends DefaultUser, AdapterUser {
     nombre: string;
-    correo: string;
-    rol: string;
+    email: string;
+    comuna: string;
+    direccion: string;
   }
 }
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     nombre: string;
-    correo: string;
-    rol: string;
+    email: string;
+    comuna: string;
+    direccion: string;
   }
 }
