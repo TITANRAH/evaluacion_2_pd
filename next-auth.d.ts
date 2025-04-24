@@ -1,7 +1,6 @@
 import { DefaultSession, DefaultUser } from "next-auth";
 import { AdapterUser } from "@auth/core/adapters";
 
-// Extendiendo el módulo next-auth
 declare module "next-auth" {
   interface Session {
     user: {
