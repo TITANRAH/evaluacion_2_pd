@@ -25,14 +25,12 @@ Se necesita convertir la estructura plana de categorías (`ICategoria[]`) en una
 Se implementó el patrón Adaptador a través del `MenuService`, que actúa como un adaptador entre la estructura de datos de categorías y la estructura requerida para el menú de navegación.
 
 ```typescript
-// Interfaz original de categorías
 interface ICategoria {
   id: number;
   nombre: string;
   padre_id: number | null;
 }
 
-// Interfaz del menú deseada
 interface ItemMenu {
   texto: string;
   enlace: string;
@@ -53,7 +51,6 @@ class MenuService {
     const categoriasMap = new Map<number, ItemMenu>();
     const menuItems: ItemMenu[] = [];
 
-    // Primero bucle foreach: crear items del menú
     categorias.forEach((categoria) => {
       const menuItem: ItemMenu = {
         texto: categoria.nombre,
@@ -68,7 +65,6 @@ class MenuService {
       }
     });
 
-    // Segundo bucle foreach: establecer relaciones padre-hijo
     categorias.forEach((categoria) => {
       if (categoria.padre_id) {
         const padre = categoriasMap.get(categoria.padre_id);
@@ -178,12 +174,12 @@ class AvisoService {
   }
 
   private async convertirAAviso(producto: IProducto): Promise<IAviso> {
-    // Coordina la obtención de stock y la transformación
+    
     const stock = await this.bodegaService.getStockConsolidado(producto.id);
     return {
       id: producto.id,
       nombre: producto.nombre,
-      precio: producto.costo * 1.3, // Lógica de negocio centralizada
+      precio: producto.costo * 1.3, 
       stock: stock,
       sku: producto.sku,
     };
@@ -240,7 +236,6 @@ NextAuth proporciona una solución más elegante y moderna que las tradicionales
 1. **Manejo Automático de Estados**:
 
 ```typescript
-// NextAuth maneja automáticamente el estado de autenticación
 const { data: session } = useSession();
 const userName = session?.user?.nombre || 'Invitado';
 ```
@@ -297,7 +292,6 @@ interface Session {
 #### Ejemplo de Implementación
 
 ```typescript
-// Componente que usa NextAuth
 export default function UserProfile() {
   const { data: session } = useSession();
 
