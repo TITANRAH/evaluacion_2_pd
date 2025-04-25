@@ -1,21 +1,20 @@
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-
 export default function LocationPage() {
   return (
-    <main className="min-h-screen flex flex-col">
-      <Header />
-      <div className="container mx-auto py-12 px-4">
-        <h1 className="text-3xl font-bold mb-6">Nuestra Ubicación</h1>
-        <div className="grid md:grid-cols-2 gap-8">
+    <main className="flex min-h-screen flex-col">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className="mb-6 text-3xl font-bold">Nuestra Ubicación</h1>
+        <div className="grid gap-8 md:grid-cols-2">
           <div>
-            <p className="text-lg mb-4">
-              Visítanos en nuestra tienda física para ver nuestra colección completa de muebles y decoración.
+            <p className="mb-4 text-lg">
+              Visítanos en nuestra tienda física para ver nuestra colección completa de muebles y
+              decoración.
             </p>
             <div className="space-y-4">
               <div>
                 <h3 className="font-medium">Dirección</h3>
-                <p className="text-muted-foreground">Alonso de Córdova 666, Las Condes, Santiago, Chile</p>
+                <p className="text-muted-foreground">
+                  Alonso de Córdova 666, Las Condes, Santiago, Chile
+                </p>
               </div>
 
               <div>
@@ -27,22 +26,25 @@ export default function LocationPage() {
 
               <div>
                 <h3 className="font-medium">Estacionamiento</h3>
-                <p className="text-muted-foreground">Contamos con estacionamiento gratuito para nuestros clientes.</p>
+                <p className="text-muted-foreground">
+                  Contamos con estacionamiento gratuito para nuestros clientes.
+                </p>
               </div>
 
               <div>
                 <h3 className="font-medium">Transporte Público</h3>
-                <p className="text-muted-foreground">Metro: Estación Manquehue (Línea 1), a 10 minutos caminando.</p>
+                <p className="text-muted-foreground">
+                  Metro: Estación Manquehue (Línea 1), a 10 minutos caminando.
+                </p>
                 <p className="text-muted-foreground">Buses: Recorridos 405, 406, 410 y 426.</p>
               </div>
             </div>
           </div>
-          <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
+          <div className="flex aspect-video items-center justify-center rounded-lg bg-gray-200">
             <p className="text-muted-foreground">Mapa de ubicación</p>
           </div>
         </div>
       </div>
-      <Footer />
     </main>
-  )
+  );
 }

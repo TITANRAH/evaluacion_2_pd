@@ -1,12 +1,14 @@
+import { Footer } from '@/components/footer';
+import { Header } from '@/components/header';
+import { Hero } from '@/components/hero';
 
-export default function RootStoreLayout({
- children
-}: {
- children: React.ReactNode;
-}) {
+export default function RootStoreLayout({ children }: { children: React.ReactNode }) {
   return (
-   <main>
-    {children}
-   </main>
+    <main>
+      <Header />
+      <Hero />
+      {children}
+      <Footer />
+    </main>
   );
 }

@@ -16,12 +16,13 @@ export class MenuService {
 
       return this.convertirCategoriasAMenu(categorias);
     } catch (error) {
-      console.error('Error al construir menú:', error);
+    //   console.error('Error al construir menú:', error);
       return [];
     }
   }
 
   private convertirCategoriasAMenu(categorias: ICategoria[]): ItemMenu[] {
+   
     const categoriasMap = new Map<number, ItemMenu>();
     const menuItems: ItemMenu[] = [];
 
@@ -43,6 +44,7 @@ export class MenuService {
     categorias.forEach((categoria) => {
       if (categoria.padre_id) {
         const padre = categoriasMap.get(categoria.padre_id);
+
         const hijo = categoriasMap.get(categoria.id);
 
         if (padre && hijo) {
@@ -51,8 +53,6 @@ export class MenuService {
         }
       }
     });
-
-    console.log('menuItems', menuItems);
 
     return menuItems;
   }

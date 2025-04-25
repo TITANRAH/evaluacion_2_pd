@@ -1,27 +1,36 @@
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 export default function ContactPage() {
   return (
-    <main className="min-h-screen flex flex-col">
-      <Header />
-      <div className="container mx-auto py-12 px-4">
-        <div className="grid md:grid-cols-2 gap-12">
+    <main className="flex min-h-screen flex-col">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid gap-12 md:grid-cols-2">
           <div>
-            <h1 className="text-3xl font-bold mb-6">Contacto</h1>
-            <p className="text-muted-foreground mb-6">
-              Estamos aquí para ayudarte. Completa el formulario y nos pondremos en contacto contigo lo antes posible.
+            <h1 className="mb-6 text-3xl font-bold">Contacto</h1>
+            <p className="mb-6 text-muted-foreground">
+              Estamos aquí para ayudarte. Completa el formulario y nos pondremos en contacto contigo
+              lo antes posible.
             </p>
 
             <div className="space-y-4">
               <div>
                 <h3 className="font-medium">Dirección</h3>
-                <p className="text-muted-foreground">Alonso de Córdova 666, Las Condes, Santiago, Chile</p>
+                <p className="text-muted-foreground">
+                  Alonso de Córdova 666, Las Condes, Santiago, Chile
+                </p>
               </div>
 
               <div>
@@ -45,7 +54,9 @@ export default function ContactPage() {
           <Card>
             <CardHeader>
               <CardTitle>Envíanos un mensaje</CardTitle>
-              <CardDescription>Completa el formulario y te responderemos a la brevedad</CardDescription>
+              <CardDescription>
+                Completa el formulario y te responderemos a la brevedad
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <form className="space-y-4">
@@ -73,7 +84,6 @@ export default function ContactPage() {
           </Card>
         </div>
       </div>
-      <Footer />
     </main>
-  )
+  );
 }

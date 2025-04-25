@@ -7,7 +7,7 @@ export class CategoriaRepository {
     try {
       return await prisma.categoria.findMany();
     } catch (error) {
-      console.error('Error al obtener categorías:', error);
+    //   console.error('Error al obtener categorías:', error);
       return [];
     }
   }
@@ -18,7 +18,7 @@ export class CategoriaRepository {
         where: { id },
       });
     } catch (error) {
-      console.error('Error al obtener categoría:', error);
+    //   console.error('Error al obtener categoría:', error);
       return null;
     }
   }

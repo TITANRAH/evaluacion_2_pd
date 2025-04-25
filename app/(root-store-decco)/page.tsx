@@ -1,24 +1,19 @@
-import { Footer } from '@/components/footer'
-import { Header } from '@/components/header'
-import { Hero } from '@/components/hero'
-import { ProductGrid } from '@/components/product-grid'
-import { products } from '@/lib/products'
-import { auth } from '@/utils/auth'
+import { Footer } from '@/components/footer';
+import { Header } from '@/components/header';
+import { Hero } from '@/components/hero';
+import { ProductGrid } from '@/components/products/product-grid';
+import { AvisoService } from '@/infrastructure/services/products/aviso.service';
 
 export default async function Home() {
+  const avisoService = new AvisoService();
+  const avisos = await avisoService.getAllAvisos();
+  // console.log('avisos', avisos);
 
-  // const session = await auth()
-  // console.log('session?.user', session?.user)
-  
-    return (
-      <main className="min-h-screen flex flex-col">
-        <Header />
-        <Hero />
-        <div className="container mx-auto py-12">
-          <ProductGrid products={products} />
-        </div>
-        <Footer />
-      </main>
-    )
-  
+  return (
+    <main className="flex min-h-screen flex-col">
+      <div className="container mx-auto py-12">
+        <ProductGrid products={avisos} />
+      </div>
+    </main>
+  );
 }

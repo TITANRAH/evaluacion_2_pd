@@ -1,4 +1,3 @@
-import { Product } from "@/types/products/product-types";
 import lamparaCarrie from "@/public/images/carrie-table-lamp.jpg"
 import lamparaNordicBeam from "@/public/images/carrie-table-lamp2.jpg"
 import lamparaNomadLight from "@/public/images/table-lamp-14x29cm.jpg"
@@ -7,7 +6,7 @@ import sillaLounge from "@/public/images/simple-model-chair.jpg"
 import sillaClasicaModerna from "@/public/images/modern-classic-chairs.jpg"
 
 
-export const products: Product[] = [
+export const products = [
   {
     id: "1",
     name: "Lámpara LumiGlow",
