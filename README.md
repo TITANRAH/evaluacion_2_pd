@@ -1,405 +1,422 @@
-# Proyecto Tienda Deccos - Actividades de Patrones de Diseño
+# Proyecto Tienda Deccos - Patrones de Diseño
 
-## Actividad 1: Implementación de Autenticación con Next-Auth
-
-### Requisitos Implementados
-
-1. **Sistema de Autenticación**
-
-   - Implementación de Next-Auth para manejo de sesiones
-   - Integración con base de datos PostgreSQL
-   - Modelo de Cliente para almacenar usuarios
-
-2. **Funcionalidades**
-
-   - Registro de usuarios
-   - Login/Logout
-   - Manejo de sesiones
-   - Protección de rutas
-
-3. **Componentes Desarrollados**
-
-   - Formulario de registro
-   - Formulario de login
-   - Componente de sesión en header
-   - Middleware para protección de rutas
-
-4. **Base de Datos**
-   - Tabla de Clientes
-   - Integración con Prisma ORM
-   - Manejo seguro de contraseñas con bcrypt
-
-### Diagrama de la Implementación
+## Estructura del Proyecto
 
 ```
-├── app/
-│   ├── api/
-│   │   └── auth/
-│   │       └── [...nextauth]/
-│   └── auth/
-│       ├── login/
-│       └── register/
-├── components/
-│   ├── auth/
-│   │   ├── LoginForm.tsx
-│   │   └── RegisterForm.tsx
-└── lib/
-    └── auth.ts
+├── app/                  # Páginas y rutas de Next.js
+├── components/           # Componentes React reutilizables
+├── infrastructure/       # Capa de infraestructura
+│   ├── repositories/     # Repositorios para acceso a datos
+│   └── services/         # Servicios de la aplicación
+├── types/                # Interfaces y tipos TypeScript
+└── prisma/               # Schema y migraciones de base de datos
 ```
 
-## Actividad 1: Implementación de Menú Jerárquico de Categorías
+## Actividad 1: Menú Jerárquico de Categorías
 
-### Requisitos Implementados
+### Patrón de Diseño: Adaptador (Adapter)
 
-1. **Estructura de Datos**
+##### Problema
 
-   - Modelo de categorías con relación padre-hijo
-   - Interface `ICategoria` y `ItemMenu`
-   - Tabla Categoria con auto-referencia
+Se necesita convertir la estructura plana de categorías (`ICategoria[]`) en una estructura jerárquica de menú (`ItemMenu[]`) que sea adecuada para la navegación en la interfaz de usuario. Las interfaces `ICategoria` e `ItemMenu` son incompatibles en su estructura.
 
-2. **Servicios Implementados**
+##### Solución
 
-   - **MenuService** (`/services/categories/menu.service.ts`):
-     - `getMenuItems()`: Obtiene estructura jerárquica del menú
-     - `convertirCategoriasAMenu()`: Convierte categorías en items de menú
-     - `generarSlug()`: Genera URLs amigables
-   - **CategoriaService** (`/services/categories/category.service.ts`):
-     - `getCategorias()`: Obtiene todas las categorías
-
-3. **Componentes UI**
-
-   - `ButtonDropDownMenu`: Menú desplegable principal
-   - `MenuItems`: Renderiza lista de items
-   - `MenuItem`: Renderiza item individual o submenú
-
-4. **Estructura de Datos**
+Se implementó el patrón Adaptador a través del `MenuService`, que actúa como un adaptador entre la estructura de datos de categorías y la estructura requerida para el menú de navegación.
 
 ```typescript
+// Interfaz original de categorías
 interface ICategoria {
   id: number;
   nombre: string;
   padre_id: number | null;
 }
 
+// Interfaz del menú deseada
 interface ItemMenu {
   texto: string;
   enlace: string;
   slug: string;
-  hijos?: ItemMenu[];
+  hijos: ItemMenu[];
+}
+
+// Adaptador
+class MenuService {
+  private categoriaService: CategoriaService;
+
+  async getMenuItems(): Promise<ItemMenu[]> {
+    const categorias = await this.categoriaService.getCategorias();
+    return this.convertirCategoriasAMenu(categorias);
+  }
+
+  private convertirCategoriasAMenu(categorias: ICategoria[]): ItemMenu[] {
+    const categoriasMap = new Map<number, ItemMenu>();
+    const menuItems: ItemMenu[] = [];
+
+    // Primero bucle foreach: crear items del menú
+    categorias.forEach((categoria) => {
+      const menuItem: ItemMenu = {
+        texto: categoria.nombre,
+        enlace: `/categoria/${categoria.id}/${this.generarSlug(categoria.nombre)}`,
+        slug: this.generarSlug(categoria.nombre),
+        hijos: [],
+      };
+      categoriasMap.set(categoria.id, menuItem);
+
+      if (!categoria.padre_id) {
+        menuItems.push(menuItem);
+      }
+    });
+
+    // Segundo bucle foreach: establecer relaciones padre-hijo
+    categorias.forEach((categoria) => {
+      if (categoria.padre_id) {
+        const padre = categoriasMap.get(categoria.padre_id);
+        const hijo = categoriasMap.get(categoria.id);
+        if (padre && hijo) {
+          padre.hijos.push(hijo);
+        }
+      }
+    });
+
+    return menuItems;
+  }
 }
 ```
 
-### Ejemplo de Jerarquía
+##### Beneficios
 
-```
-Categorías Principales:
-├── Lámparas
-│   ├── Salón
-│   ├── Comedor
-│   ├── Dormitorio
-│   └── Exterior
-└── Sillas
-    ├── Clásicas
-    ├── Modernas
-    └── Rústicas
-```
+1. **Separación de Responsabilidades**:
 
-### Diagrama de Clases
+El `MenuService` encapsula toda la lógica de conversión, manteniendo el código limpio y organizado.
+
+2. **Reutilización**:
+
+La transformación puede ser utilizada en cualquier parte de la aplicación que necesite convertir categorías a elementos de menú.
+
+3. **Mantenibilidad**:
+
+Los cambios en la estructura de las categorías o del menú solo requieren modificaciones en el adaptador.
+
+4. **Flexibilidad**:
+
+Permite trabajar con interfaces incompatibles sin modificar su código fuente.
+
+##### Diagrama de Clases
 
 ```mermaid
 classDiagram
+    class ICategoria {
+        <<interface>>
+        +id: number
+        +nombre: string
+        +padre_id: number|null
+    }
+
+    class ItemMenu {
+        <<interface>>
+        +texto: string
+        +enlace: string
+        +slug: string
+        +hijos: ItemMenu[]
+    }
+
     class MenuService {
         -categoriaService: CategoriaService
-        +getMenuItems()
-        -convertirCategoriasAMenu()
-        -generarSlug()
+        +getMenuItems() Promise<ItemMenu[]>
+        -convertirCategoriasAMenu(categorias: ICategoria[]) ItemMenu[]
+        -generarSlug(texto: string) string
     }
 
     class CategoriaService {
-        +getCategorias()
+        +getCategorias() Promise<ICategoria[]>
     }
 
-    class ButtonDropDownMenu {
-        +render()
-    }
-
-    class MenuItem {
-        +render()
-    }
-
-    MenuService --> CategoriaService
-    ButtonDropDownMenu --> MenuService
-    ButtonDropDownMenu --> MenuItem
+    MenuService ..> ICategoria : adapta
+    MenuService ..> ItemMenu : produce
+    MenuService --> CategoriaService : usa
 ```
 
-### Beneficios de la Implementación
+## Actividad 2: Gestión de Productos y Stock
 
-1. **Organización Clara**:
+### Patrón de Diseño: Fachada (Facade)
 
-   - Separación entre datos y presentación
-   - Servicios especializados
-   - Componentes reutilizables
+Se eligió el patrón Fachada porque:
 
-2. **Mantenibilidad**:
-   - Fácil agregar nuevas categorías
-   - Estructura flexible para subcategorías
-   - URLs amigables automáticas
+1. **Problema**:
 
-## Actividad 2: Implementación del Patrón de Servicios
+   - Sistema complejo con múltiples subsistemas (productos, stock, avisos)
+   - Necesidad de una interfaz simplificada para el cliente
+   - Múltiples operaciones relacionadas que debían coordinarse
 
-### Requisitos Implementados
+2. **Solución**:
 
-1. **Interfaces Definidas** (`/types/products/`)
+   - `AvisoService` actúa como fachada, simplificando la interacción con los subsistemas
+   - Encapsula la complejidad de la lógica de negocio
+   - Coordina las operaciones entre `BodegaService`, `ProductoRepository` y `StockRepository`
 
-   - `IProducto`: Estructura base de productos
-   - `IStock`: Manejo de inventario
-   - `IAviso`: Presentación de productos
+3. **Beneficios**:
 
-2. **Servicios** (`/services/categories/`)
+   - Interfaz unificada y simple para el cliente
+   - Desacoplamiento entre la presentación y la lógica de negocio
+   - Centralización de la lógica de transformación de productos a avisos
 
-   - **BodegaService**:
-     - Gestión de productos y stock
-     - Métodos: getProductoBySku, getStockConsolidado, getProductosPorCategoria
-   - **AvisoService**:
-     - Transformación de productos a avisos
-     - Cálculo automático de precio con 30% de utilidad
+### Implementación
 
-3. **Repositorios** (`/repositories/`)
+```typescript
+class AvisoService {
+  constructor(private bodegaService: BodegaService) {}
 
-   - **ProductoRepository**: Acceso a datos de productos
-   - **StockRepository**: Gestión de inventario
+  async getAllAvisos(): Promise<IAviso[]> {
+    const productos = await this.bodegaService.getAllProductos();
+    return Promise.all(productos.map((producto) => this.convertirAAviso(producto)));
+  }
 
-4. **Base de Datos**
-   - Tablas: Producto, Stock, Categoria, Bodega
-   - Relaciones establecidas
-   - Datos de prueba insertados
+  async getAvisosPorCategoria(categoriaId: number): Promise<IAviso[]> {
+    const productos = await this.bodegaService.getProductosPorCategoria(categoriaId);
+    return Promise.all(productos.map((producto) => this.convertirAAviso(producto)));
+  }
 
-### Diagrama de Clases
+  private async convertirAAviso(producto: IProducto): Promise<IAviso> {
+    // Coordina la obtención de stock y la transformación
+    const stock = await this.bodegaService.getStockConsolidado(producto.id);
+    return {
+      id: producto.id,
+      nombre: producto.nombre,
+      precio: producto.costo * 1.3, // Lógica de negocio centralizada
+      stock: stock,
+      sku: producto.sku,
+    };
+  }
+}
+```
+
+### Diagrama de la Fachada
 
 ```mermaid
 classDiagram
-    class IProducto {
-        +id: number
-        +sku: string
-        +nombre: string
-        +costo: number
-        +imagen: string
-    }
-
-    class IAviso {
-        +id: number
-        +titulo: string
-        +precio: number
-        +stock: number
+    class AvisoService {
+        +getAllAvisos()
+        +getAvisosPorCategoria()
+        -convertirAAviso()
     }
 
     class BodegaService {
+        +getAllProductos()
         +getProductoBySku()
         +getStockConsolidado()
         +getProductosPorCategoria()
     }
 
-    class AvisoService {
-        +convertirAAviso()
-        +getAvisosPorCategoria()
+    class ProductoRepository {
+        +findAll()
+        +findBySku()
+        +findByCategoriaId()
     }
 
-    AvisoService --> BodegaService
-    BodegaService ..> IProducto
-    AvisoService ..> IAviso
+    class StockRepository {
+        +findByProductoId()
+        +getStockConsolidado()
+    }
+
+    Client --> AvisoService : uses
+    AvisoService --> BodegaService : simplifies
+    BodegaService --> ProductoRepository : manages
+    BodegaService --> StockRepository : manages
 ```
 
-### Estructura del Proyecto
+## Actividad 3: Manejo de Usuarios No Autenticados
 
-```
-services/
-  ├── categories/
-  │   ├── aviso.service.ts
-  │   ├── bodega.service.ts
-  │   ├── menu.service.ts
-  │   └── category.service.ts
-repositories/
-  ├── product.repository.ts
-  └── stock.repository.ts
-types/
-  ├── products/
-  │   ├── product-types.ts
-  │   └── stock-types.ts
-  ├── menu/
-  │   └── item-menu.types.ts
-  └── category/
-      └── category.ts
+### Patrón de Diseño: Null Object
+
+#### Problema
+
+Se necesita manejar de forma segura los estados de autenticación sin generar errores de NullPointerException, manteniendo una experiencia de usuario fluida.
+
+#### Solución con NextAuth
+
+NextAuth proporciona una solución más elegante y moderna que las tradicionales de Java:
+
+1. **Manejo Automático de Estados**:
+
+```typescript
+// NextAuth maneja automáticamente el estado de autenticación
+const { data: session } = useSession();
+const userName = session?.user?.nombre || 'Invitado';
 ```
 
-### Beneficios de la Implementación
+2. **Tipos Seguros**:
 
-1. **Separación de Responsabilidades**
+```typescript
+interface Session {
+  user: {
+    id: string;
+    nombre: string;
+    email: string;
+    comuna: string;
+    direccion: string;
+  } | null;
+}
+```
 
-   - Servicios manejan lógica de negocio
-   - Repositorios manejan acceso a datos
-   - Interfaces definen contratos claros
+#### Ventajas sobre Spring Security
 
-2. **Mantenibilidad**
+1. **Simplicidad**:
 
-   - Código organizado por funcionalidad
-   - Fácil de modificar y extender
-   - Bajo acoplamiento entre componentes
+   - No requiere configuración compleja de XML o Java
+   - Integración nativa con React y TypeScript
+   - Manejo automático de sesiones
 
-3. **Escalabilidad**
-   - Fácil agregar nuevos servicios
-   - Fácil modificar lógica de negocio
-   - Independencia de la fuente de datos
+2. **Seguridad Mejorada**:
 
-## Tecnologías Utilizadas
+   - Prevención nativa de NullPointerException
+   - Manejo automático de tokens JWT
+   - Protección contra CSRF integrada
+
+3. **Desarrollo más Rápido**:
+
+   - Menos código boilerplate
+   - Configuración declarativa
+   - Hot-reloading de cambios
+
+4. **Mejor Experiencia de Usuario**:
+   - Transiciones suaves entre estados
+   - No requiere recargas de página
+   - Estado de autenticación persistente
+
+#### Comparación con Spring Security
+
+| Característica | NextAuth            | Spring Security        |
+| -------------- | ------------------- | ---------------------- |
+| Configuración  | Declarativa, simple | XML/Java, compleja     |
+| Manejo de Null | Automático          | Requiere configuración |
+| Integración    | Nativa con React    | Requiere adaptadores   |
+| Desarrollo     | Rápido              | Más lento              |
+| Mantenimiento  | Simple              | Complejo               |
+
+#### Ejemplo de Implementación
+
+```typescript
+// Componente que usa NextAuth
+export default function UserProfile() {
+  const { data: session } = useSession();
+
+  return (
+    <div>
+      <h1>Bienvenido {session?.user?.nombre || 'Invitado'}</h1>
+      {session ? (
+        <UserDashboard user={session.user} />
+      ) : (
+        <GuestView />
+      )}
+    </div>
+  );
+}
+```
+
+#### Beneficios
+
+1. **Código más Limpio**:
+
+   - No hay necesidad de manejar excepciones
+   - Tipado seguro con TypeScript
+   - Menos código boilerplate
+
+2. **Mejor Mantenibilidad**:
+
+   - Separación clara de responsabilidades
+   - Fácil de extender
+   - Documentación clara
+
+3. **Rendimiento**:
+
+   - Carga más rápida
+   - Menos overhead
+   - Mejor caching
+
+4. **Seguridad**:
+   - Protección automática contra ataques comunes
+   - Manejo seguro de sesiones
+   - Tokens JWT seguros
+
+#### Diagrama de la Solución
+
+```mermaid
+classDiagram
+    class SessionProvider {
+        +provides default user state
+        +handles authentication status
+    }
+
+    class Session {
+        +user: User | null
+        +status: "authenticated" | "unauthenticated"
+    }
+
+    class AuthenticatedUser {
+        +id: string
+        +nombre: string
+        +email: string
+    }
+
+    class GuestUser {
+        +id: null
+        +nombre: "Invitado"
+        +email: null
+    }
+
+    SessionProvider --> Session : manages
+    Session --> AuthenticatedUser : returns when authenticated
+    Session --> GuestUser : returns when not authenticated
+```
+
+## Tecnologías y Configuración
+
+### Stack Tecnológico
 
 - Next.js 14
 - TypeScript
 - PostgreSQL con Prisma
-- Tailwind CSS
 - Next-Auth
-- Bcrypt
+- Tailwind CSS
 
-## Instalación y Uso
-
-```bash
-npm install
-npm run dev
-```
-
-## Configuración de Base de Datos
+### Variables de Entorno
 
 ```bash
-# Configurar variables de entorno
 DATABASE_URL="postgresql://..."
 NEXTAUTH_SECRET="..."
 NEXTAUTH_URL="http://localhost:3000"
-
-# Ejecutar migraciones
-npx prisma migrate dev
 ```
 
-# Implementación del Patrón de Servicios - Tienda Deccos
-
-## Descripción del Patrón
-
-El patrón de servicios implementado en este proyecto sigue el principio de Separación de Responsabilidades (SRP) y se estructura en tres capas principales:
-
-### 1. Capa de Servicios
-
-Los servicios actúan como intermediarios entre la capa de presentación y los repositorios. Cada servicio tiene una responsabilidad única:
-
-- **BodegaService**:
-
-  - Responsabilidad: Gestionar la lógica de negocio relacionada con productos y stock
-  - Beneficio: Centraliza todas las operaciones relacionadas con el inventario
-  - Ejemplo: Cuando se necesita el stock de un producto, este servicio consolida la información de todas las bodegas
-
-- **AvisoService**:
-  - Responsabilidad: Transformar productos en avisos para su presentación
-  - Beneficio: Encapsula la lógica de presentación y cálculo de precios
-  - Ejemplo: Aplica el 30% de utilidad al costo del producto automáticamente
-
-### 2. Capa de Repositorios
-
-Los repositorios manejan el acceso a datos:
-
-- **ProductoRepository**:
-
-  - Responsabilidad: CRUD de productos
-  - Beneficio: Abstrae la complejidad de las consultas a la base de datos
-
-- **StockRepository**:
-  - Responsabilidad: Gestión del stock
-  - Beneficio: Centraliza las operaciones de inventario
-
-### 3. Capa de Interfaces
-
-Define los contratos que deben seguir las entidades:
-
-- **IProducto**: Define la estructura de un producto
-- **IStock**: Define la estructura del stock
-- **IAviso**: Define cómo se presenta un producto en la tienda
-
-## Beneficios de la Implementación
-
-1. **Mantenibilidad**:
-
-   - Cada componente tiene una responsabilidad única
-   - Los cambios en la lógica de negocio solo afectan a los servicios
-   - Los cambios en el acceso a datos solo afectan a los repositorios
-
-2. **Escalabilidad**:
-
-   - Fácil agregar nuevos servicios sin afectar los existentes
-   - Posibilidad de cambiar la base de datos sin afectar la lógica de negocio
-
-3. **Testabilidad**:
-   - Cada capa puede ser probada de forma independiente
-   - Facilita la creación de mocks para pruebas
-
-## Ejemplo de Flujo
-
-```typescript
-// 1. El frontend solicita productos de una categoría
-const avisos = await avisoService.getAvisosPorCategoria(1);
-
-// 2. AvisoService solicita productos a BodegaService
-const productos = await bodegaService.getProductosPorCategoria(1);
-
-// 3. BodegaService usa ProductoRepository para obtener datos
-const productos = await productoRepository.findByCategoriaId(1);
-
-// 4. Para cada producto, se obtiene su stock
-const stock = await stockRepository.getStockConsolidado(productoId);
-
-// 5. Se transforma el producto en aviso
-const aviso = {
-  ...producto,
-  precio: producto.costo * 1.3,
-  stock,
-};
-```
-
-## Tecnologías Utilizadas
-
-- Next.js 14
-- TypeScript
-- PostgreSQL con Prisma
-- Tailwind CSS
-
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
-## Getting Started
-
-First, run the development server:
+### Comandos
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Instalación
+npm install    # Instalar dependencias
+npm run dev    # Iniciar servidor de desarrollo
+
+# Base de Datos
+npx prisma db push  # Sincronizar el schema con la base de datos
+npx prisma generate # Generar el cliente de Prisma
+
+# Datos de Prueba
+# 1. Ubicar el archivo SQL en la raíz del proyecto:
+#    /tienda/database/seed.sql
+
+# 2. Ejecutar el archivo SQL en tu base de datos:
+#    - Si usas el cliente psql:
+psql -h tu-host -d tu-database -U tu-usuario -f database/seed.sql
+
+#    - Si usas pgAdmin:
+#    1. Abrir pgAdmin
+#    2. Conectar a tu base de datos
+#    3. Abrir la herramienta de consultas
+#    4. Arrastrar o copiar el contenido de seed.sql
+#    5. Ejecutar las consultas
+
+# El archivo seed.sql contiene:
+# - Datos de categorías con estructura jerárquica
+# - Productos de ejemplo
+# - Registros de stock
+# - Usuarios de prueba
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
